@@ -39,6 +39,41 @@
           }
         }
       }
+    },
+    "/speech/synthesize": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SynthesisRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful synthesis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SynthesisResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid text or parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -107,6 +142,61 @@
             "additionalProperties": {
               "type": "string"
             }
+          }
+        }
+      },
+      "SynthesisRequest": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Text to synthesize into speech"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language code like en-US, ar-EG",
+            "default": "en-US"
+          },
+          "voice": {
+            "type": "string",
+            "description": "Voice name (e.g., en-US-Wavenet-D, ar-XA-Wavenet-A)"
+          },
+          "speed": {
+            "type": "number",
+            "format": "double",
+            "description": "Speaking rate (0.25 to 4.0)",
+            "default": 1.0
+          },
+          "pitch": {
+            "type": "number",
+            "format": "double",
+            "description": "Pitch adjustment (-20.0 to 20.0)",
+            "default": 0.0
+          }
+        }
+      },
+      "SynthesisResponse": {
+        "type": "object",
+        "required": ["audio", "audio_format"],
+        "properties": {
+          "audio": {
+            "type": "string",
+            "description": "Base64 encoded audio data"
+          },
+          "audio_format": {
+            "type": "string",
+            "description": "Audio format (mp3, wav, etc.)",
+            "default": "mp3"
+          },
+          "duration_seconds": {
+            "type": "number",
+            "format": "double",
+            "description": "Duration of synthesized audio in seconds"
+          },
+          "voice_used": {
+            "type": "string",
+            "description": "Actual voice used for synthesis"
           }
         }
       }
