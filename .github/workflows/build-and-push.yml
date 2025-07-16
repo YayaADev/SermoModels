@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/sermo-models
+  IMAGE_NAME: yayaadev/sermo-models
 
 jobs:
   build-and-push:
