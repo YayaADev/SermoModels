@@ -1,0 +1,38 @@
+{
+  "name": "@yayaadev/sermo-models",
+  "version": "1.0.0",
+  "description": "TypeScript models for Sermo API generated from OpenAPI specification",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "scripts": {
+    "build": "gradle generateTypeScript && npm run compile",
+    "compile": "tsc",
+    "prepublishOnly": "npm run build",
+    "clean": "rm -rf dist/ build/generated/typescript/"
+  },
+  "keywords": [
+    "sermo",
+    "api",
+    "models",
+    "typescript",
+    "openapi",
+    "speech",
+    "language-learning"
+  ],
+  "author": "Sermo Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/sermo-models.git"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  }
+}
