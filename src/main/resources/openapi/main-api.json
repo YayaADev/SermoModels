@@ -1,0 +1,37 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Sermo API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/speech/transcribe": {
+      "$ref": "./paths/speech/transcribe.json"
+    },
+    "/speech/synthesize": {
+      "$ref": "./paths/speech/synthesize.json"
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorResponse": {
+        "$ref": "./schemas/common/error-response.json"
+      },
+      "ApiError": {
+        "$ref": "./schemas/common/api-error.json"
+      },
+      "TranscriptionRequest": {
+        "$ref": "./schemas/speech/transcription-request.json"
+      },
+      "TranscriptionResponse": {
+        "$ref": "./schemas/speech/transcription-response.json"
+      },
+      "SynthesisRequest": {
+        "$ref": "./schemas/speech/synthesis-request.json"
+      },
+      "SynthesisResponse": {
+        "$ref": "./schemas/speech/synthesis-response.json"
+      }
+    }
+  }
+}

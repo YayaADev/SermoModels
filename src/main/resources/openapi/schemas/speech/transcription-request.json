@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "required": ["audio"],
+  "properties": {
+    "audio": {
+      "type": "string",
+      "description": "Base64 encoded audio data",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+      "example": "UklGRnoGAABXQVZFZm10IBAAAAABAAEA..."
+    },
+    "language": {
+      "type": "string",
+      "description": "Language code like en-US, ar-EG",
+      "default": "en-US",
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+      "example": "en-US"
+    },
+    "context": {
+      "type": "string",
+      "description": "Optional context phrases for better accuracy (comma-separated)",
+      "maxLength": 1000,
+      "example": "medical, diagnosis, treatment"
+    }
+  }
+}

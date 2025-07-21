@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "required": ["transcription", "confidence", "detected_language"],
+  "properties": {
+    "transcription": {
+      "type": "string",
+      "description": "The transcribed text from the audio",
+      "example": "The patient shows signs of improvement."
+    },
+    "confidence": {
+      "type": "number",
+      "format": "double",
+      "description": "Confidence score for the transcription (0.0 to 1.0)",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "example": 0.95
+    },
+    "detected_language": {
+      "type": "string",
+      "description": "Language detected from the audio",
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+      "example": "en-US"
+    },
+    "alternatives": {
+      "type": "array",
+      "description": "Alternative transcription results",
+      "items": {
+        "type": "string"
+      },
+      "example": [
+        "The patient shows signs of improvements.",
+        "The patients shows signs of improvement."
+      ]
+    }
+  }
+}

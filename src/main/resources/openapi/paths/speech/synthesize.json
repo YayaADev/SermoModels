@@ -1,0 +1,57 @@
+{
+  "post": {
+    "summary": "Synthesize text to speech",
+    "description": "Convert text to audio using text-to-speech synthesis",
+    "tags": ["Speech"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "../../schemas/speech/synthesis-request.json"
+          },
+          "examples": {
+            "basic": {
+              "summary": "Basic synthesis request",
+              "value": {
+                "text": "Hello, this is a test message."
+              }
+            },
+            "advanced": {
+              "summary": "Advanced synthesis with custom settings",
+              "value": {
+                "text": "Hello, this is a test message.",
+                "language": "en-US",
+                "voice": "en-US-Wavenet-D",
+                "speed": 1.2,
+                "pitch": 2.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful synthesis",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../../schemas/speech/synthesis-response.json"
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Bad request - invalid text or parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../../schemas/common/error-response.json"
+            }
+          }
+        }
+      }
+    }
+  }
+}

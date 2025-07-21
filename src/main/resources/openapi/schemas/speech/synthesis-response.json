@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "required": ["audio", "audio_format", "detected_language"],
+  "properties": {
+    "audio": {
+      "type": "string",
+      "description": "Base64 encoded audio data",
+      "pattern": "^[A-Za-z0-9+/]*={0,2}$",
+      "example": "UklGRnoGAABXQVZFZm10IBAAAAABAAEA..."
+    },
+    "audio_format": {
+      "type": "string",
+      "description": "Audio format (mp3, wav, etc.)",
+      "default": "mp3",
+      "enum": ["mp3", "wav", "ogg", "flac"],
+      "example": "mp3"
+    },
+    "detected_language": {
+      "type": "string",
+      "description": "Language detected from the input text",
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+      "example": "en-US"
+    },
+    "language_confidence": {
+      "type": "number",
+      "format": "double",
+      "description": "Confidence score for language detection (0.0 to 1.0)",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "example": 0.98
+    },
+    "duration_seconds": {
+      "type": "number",
+      "format": "double",
+      "description": "Duration of synthesized audio in seconds",
+      "minimum": 0.0,
+      "example": 3.5
+    },
+    "voice_used": {
+      "type": "string",
+      "description": "Actual voice used for synthesis",
+      "example": "en-US-Wavenet-D"
+    }
+  }
+}

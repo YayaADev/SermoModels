@@ -1,0 +1,90 @@
+{
+  "post": {
+    "summary": "Transcribe audio to text",
+    "description": "Convert audio data to text using speech recognition",
+    "tags": ["Speech"],
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "$ref": "../../schemas/speech/transcription-request.json"
+          },
+          "examples": {
+            "basic": {
+              "summary": "Basic transcription request",
+              "value": {
+                "audio": "UklGRnoGAABXQVZFZm10IBAAAAABAAEA...",
+                "language": "en-US"
+              }
+            },
+            "with_context": {
+              "summary": "Transcription with context",
+              "value": {
+                "audio": "UklGRnoGAABXQVZFZm10IBAAAAABAAEA...",
+                "language": "en-US",
+                "context": "medical, diagnosis, treatment"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful transcription",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../../schemas/speech/transcription-response.json"
+            },
+            "examples": {
+              "success": {
+                "summary": "Successful transcription",
+                "value": {
+                  "transcription": "The patient shows signs of improvement.",
+                  "confidence": 0.95,
+                  "detected_language": "en-US",
+                  "alternatives": [
+                    "The patient shows signs of improvements.",
+                    "The patients shows signs of improvement."
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Bad request - invalid audio data or parameters",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "../../schemas/common/error-response.json"
+            },
+            "examples": {
+              "invalid_audio": {
+                "summary": "Invalid audio data",
+                "value": {
+                  "error": {
+                    "code": "INVALID_AUDIO",
+                    "message": "Audio data cannot be empty"
+                  }
+                }
+              },
+              "invalid_base64": {
+                "summary": "Invalid base64 encoding",
+                "value": {
+                  "error": {
+                    "code": "INVALID_BASE64",
+                    "message": "Invalid base64 audio data"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

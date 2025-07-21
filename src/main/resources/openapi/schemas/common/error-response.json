@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "required": ["error"],
+  "properties": {
+    "error": {
+      "$ref": "./api-error.json"
+    }
+  }
+}

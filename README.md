@@ -86,16 +86,29 @@ npm run clean
 ```
 SermoModels/
 ├── src/main/resources/openapi/
-│   └── sermo-api.json              # OpenAPI specification (source of truth)
+│   ├── main-api.json              # Main OpenAPI specification (source of truth)
+│   ├── paths/                     # API endpoint definitions
+│   │   └── speech/
+│   │       ├── transcribe.json   # Speech transcription endpoint
+│   │       └── synthesize.json   # Speech synthesis endpoint
+│   └── schemas/                   # Data model definitions
+│       ├── common/                # Shared models
+│       │   ├── api-error.json    # Error structure
+│       │   └── error-response.json # Error response wrapper
+│       └── speech/                # Speech-related models
+│           ├── transcription-request.json
+│           ├── transcription-response.json
+│           ├── synthesis-request.json
+│           └── synthesis-response.json
 ├── build/generated/
-│   ├── openapi/                    # Generated Kotlin models
-│   └── typescript/                 # Generated TypeScript models
-├── dist/                           # Compiled npm package
-├── package.json                    # NPM package configuration
-├── build.gradle.kts               # Gradle build configuration
+│   ├── openapi/                   # Generated Kotlin models
+│   └── typescript/                # Generated TypeScript models
+├── dist/                          # Compiled npm package
+├── package.json                   # NPM package configuration
+├── build.gradle.kts              # Gradle build configuration
 └── .github/workflows/
-    ├── build-and-push.yml         # Docker image publishing
-    └── publish-npm.yml            # NPM package publishing
+    ├── build-and-push.yml        # Docker image publishing
+    └── publish-npm.yml           # NPM package publishing
 ```
 
 ##  Available Models
@@ -119,9 +132,16 @@ All models are generated from the OpenAPI specification and include:
 ##  Automatic Updates
 
 The models are automatically updated when:
-1. The OpenAPI spec (`sermo-api.json`) changes
+1. Any OpenAPI specification files change (`main-api.json` or files in `paths/` or `schemas/` directories)
 2. Changes are pushed to the main branch
 3. GitHub Actions workflows regenerate and publish new versions
+
+### Modular OpenAPI Structure
+
+The OpenAPI specification is now organized modularly:
+- **main-api.json**: Main specification file with references to other components
+- **paths/**: Individual endpoint definitions organized by feature area
+- **schemas/**: Reusable data model definitions grouped by domain
 
 ### Manual Publishing
 

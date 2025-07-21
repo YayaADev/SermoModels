@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "required": ["text"],
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "Text to synthesize into speech",
+      "minLength": 1,
+      "maxLength": 5000,
+      "example": "Hello, this is a test message for speech synthesis."
+    },
+    "language": {
+      "type": "string",
+      "description": "Language code like en-US, ar-EG",
+      "default": "en-US",
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+      "example": "en-US"
+    },
+    "voice": {
+      "type": "string",
+      "description": "Voice name (e.g., en-US-Wavenet-D, ar-XA-Wavenet-A)",
+      "example": "en-US-Wavenet-D"
+    },
+    "speed": {
+      "type": "number",
+      "format": "double",
+      "description": "Speaking rate (0.25 to 4.0)",
+      "default": 1.0,
+      "minimum": 0.25,
+      "maximum": 4.0,
+      "example": 1.2
+    },
+    "pitch": {
+      "type": "number",
+      "format": "double",
+      "description": "Pitch adjustment (-20.0 to 20.0)",
+      "default": 0.0,
+      "minimum": -20.0,
+      "maximum": 20.0,
+      "example": 2.0
+    }
+  }
+}

@@ -24,7 +24,7 @@ kotlin {
 // Kotlin generation
 openApiGenerate {
     generatorName.set("kotlin")
-    inputSpec.set("$projectDir/src/main/resources/openapi/sermo-api.json")
+    inputSpec.set("$projectDir/src/main/resources/openapi/main-api.json")
     outputDir.set("${layout.buildDirectory.get()}/generated/openapi")
     packageName.set("com.sermo.models")
     modelPackage.set("com.sermo.models")
@@ -47,7 +47,7 @@ openApiGenerate {
 // TypeScript generation for npm package
 val generateTypeScript by tasks.registering(org.openapitools.generator.gradle.plugin.tasks.GenerateTask::class) {
     generatorName.set("typescript-fetch")
-    inputSpec.set("$projectDir/src/main/resources/openapi/sermo-api.json")
+    inputSpec.set("$projectDir/src/main/resources/openapi/main-api.json")
     outputDir.set("${layout.buildDirectory.get()}/generated/typescript")
     packageName.set("sermo-models")
     
