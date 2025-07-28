@@ -1,17 +1,17 @@
 {
   "name": "@yayaadev/sermo-models",
-  "version": "1.0.0",
-  "description": "TypeScript models for Sermo API generated from OpenAPI specification",
+  "version": "1.0.1",
+  "description": "TypeScript models for Sermo API (HTTP and WebSocket) generated from OpenAPI specifications",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/**/*"
   ],
   "scripts": {
-    "build": "gradle generateTypeScript && npm run compile",
+    "build": "gradle generateTypeScript generateWebSocketTypeScript createCombinedIndexFile && npm run compile",
     "compile": "tsc",
     "prepublishOnly": "npm run build",
-    "clean": "rm -rf dist/ build/generated/typescript/"
+    "clean": "rm -rf dist/ build/generated/typescript/ build/generated/typescript-websocket/"
   },
   "keywords": [
     "sermo",
@@ -20,7 +20,9 @@
     "typescript",
     "openapi",
     "speech",
-    "language-learning"
+    "language-learning",
+    "websocket",
+    "real-time"
   ],
   "author": "Sermo Team",
   "license": "MIT",
