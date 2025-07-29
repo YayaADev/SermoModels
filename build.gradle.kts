@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.21"
     kotlin("plugin.serialization") version "1.9.21"
     id("org.openapi.generator") version "7.2.0"
+    id("com.google.protobuf") version "0.9.4"
     `maven-publish`
 }
 
@@ -15,13 +16,34 @@ repositories {
 dependencies {
     // JSON serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    
+    // Protocol Buffers dependencies
+    implementation("com.google.protobuf:protobuf-kotlin:3.25.1")
+    implementation("com.google.protobuf:protobuf-java:3.25.1")
 }
 
 kotlin {
     jvmToolchain(21)
 }
 
-// Existing HTTP API Kotlin generation
+// Protocol Buffers configuration
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.1"
+    }
+    
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                create("kotlin") {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
+
+// OpenAPI generation (HTTP models)
 openApiGenerate {
     generatorName.set("kotlin")
     inputSpec.set("$projectDir/src/main/resources/openapi/main-api.json")
@@ -34,7 +56,6 @@ openApiGenerate {
         "library" to "jvm-ktor",
         "useCoroutines" to "true"
     ))
-    // Only generate models, not client code
     globalProperties.set(mapOf(
         "models" to "",
         "apis" to "false",
@@ -42,28 +63,7 @@ openApiGenerate {
     ))
 }
 
-// WebSocket models Kotlin generation
-val generateWebSocketModels by tasks.registering(org.openapitools.generator.gradle.plugin.tasks.GenerateTask::class) {
-    generatorName.set("kotlin")
-    inputSpec.set("$projectDir/src/main/resources/openapi/websocket-models.json")
-    outputDir.set("${layout.buildDirectory.get()}/generated/websocket")
-    packageName.set("com.sermo.websocket.models")
-    modelPackage.set("com.sermo.websocket.models")
-    apiPackage.set("com.sermo.websocket.models")
-    configOptions.set(mapOf(
-        "serializationLibrary" to "kotlinx_serialization",
-        "library" to "jvm-ktor",
-        "useCoroutines" to "true"
-    ))
-    // Only generate models, not client code
-    globalProperties.set(mapOf(
-        "models" to "",
-        "apis" to "false",
-        "supportingFiles" to "false"
-    ))
-}
-
-// Existing HTTP API TypeScript generation
+// TypeScript generation for OpenAPI
 val generateTypeScript by tasks.registering(org.openapitools.generator.gradle.plugin.tasks.GenerateTask::class) {
     generatorName.set("typescript-fetch")
     inputSpec.set("$projectDir/src/main/resources/openapi/main-api.json")
@@ -77,7 +77,6 @@ val generateTypeScript by tasks.registering(org.openapitools.generator.gradle.pl
         "supportsES6" to "true",
         "enumPropertyNaming" to "PascalCase"
     ))
-    // Only generate models, not API client
     globalProperties.set(mapOf(
         "models" to "",
         "apis" to "false",
@@ -87,44 +86,39 @@ val generateTypeScript by tasks.registering(org.openapitools.generator.gradle.pl
     ))
 }
 
-// WebSocket models TypeScript generation
-val generateWebSocketTypeScript by tasks.registering(org.openapitools.generator.gradle.plugin.tasks.GenerateTask::class) {
-    generatorName.set("typescript-fetch")
-    inputSpec.set("$projectDir/src/main/resources/openapi/websocket-models.json")
-    outputDir.set("${layout.buildDirectory.get()}/generated/typescript-websocket")
-    packageName.set("sermo-websocket-models")
-
-    configOptions.set(mapOf(
-        "npmName" to "sermo-websocket-models",
-        "npmVersion" to project.version.toString(),
-        "typescriptThreePlus" to "true",
-        "supportsES6" to "true",
-        "enumPropertyNaming" to "PascalCase"
-    ))
-    globalProperties.set(mapOf(
-        "models" to "",
-        "apis" to "false",
-        "supportingFiles" to "runtime.ts",
-        "modelTests" to "false",
-        "modelDocs" to "false"
-    ))
+// TypeScript generation for Protocol Buffers
+val generateProtobufTypeScript by tasks.registering(Exec::class) {
+    group = "protobuf"
+    description = "Generate TypeScript files from Protocol Buffers"
+    
+    dependsOn("generateProto")
+    
+    doFirst {
+        file("${layout.buildDirectory.get()}/generated/typescript-protobuf").mkdirs()
+    }
+    
+    commandLine("protoc",
+        "--proto_path=src/main/resources/proto",
+        "--ts_out=${layout.buildDirectory.get()}/generated/typescript-protobuf",
+        "src/main/resources/proto/sermo-protocol.proto"
+    )
 }
 
-// Auto-discover and create combined index file
+// Create combined TypeScript index file
 val createCombinedIndexFile by tasks.registering {
-    dependsOn(generateTypeScript, generateWebSocketTypeScript)
+    dependsOn(generateTypeScript, generateProtobufTypeScript)
     doLast {
         val httpModelsDir = file("${layout.buildDirectory.get()}/generated/typescript/src/models")
-        val wsModelsDir = file("${layout.buildDirectory.get()}/generated/typescript-websocket/src/models")
+        val protobufDir = file("${layout.buildDirectory.get()}/generated/typescript-protobuf")
         val indexFile = file("${layout.buildDirectory.get()}/generated/typescript/src/index.ts")
-        val wsTargetDir = file("${layout.buildDirectory.get()}/generated/typescript/src/websocket")
+        val protobufTargetDir = file("${layout.buildDirectory.get()}/generated/typescript/src/protobuf")
 
-        // Create websocket directory in typescript output
-        wsTargetDir.mkdirs()
+        // Create protobuf directory
+        protobufTargetDir.mkdirs()
 
         val exports = mutableListOf<String>()
 
-        // Auto-discover HTTP models
+        // Export HTTP models
         if (httpModelsDir.exists()) {
             httpModelsDir.listFiles()?.filter { it.extension == "ts" }?.forEach { file ->
                 val modelName = file.nameWithoutExtension
@@ -132,41 +126,43 @@ val createCombinedIndexFile by tasks.registering {
             }
         }
 
-        // Copy WebSocket models to typescript output and create exports
-        if (wsModelsDir.exists()) {
-            wsModelsDir.listFiles()?.filter { it.extension == "ts" }?.forEach { file ->
+        // Copy and export Protocol Buffer models
+        if (protobufDir.exists()) {
+            protobufDir.listFiles()?.filter { it.extension == "ts" }?.forEach { file ->
                 val modelName = file.nameWithoutExtension
-                // Copy the file to the websocket subdirectory
-                file.copyTo(File(wsTargetDir, file.name), overwrite = true)
-                exports.add("export * from './websocket/$modelName';")
+                file.copyTo(File(protobufTargetDir, file.name), overwrite = true)
+                exports.add("export * from './protobuf/$modelName';")
             }
         }
 
         indexFile.writeText("""
-// Auto-generated index file for Sermo API models
-// Do not edit this file manually
+// Auto-generated index file for Sermo models
+// HTTP models (OpenAPI) + Real-time models (Protocol Buffers)
 
 ${exports.joinToString("\n")}
         """.trimIndent())
     }
 }
 
-// Add generated sources to compilation
+// Configure source directories
 sourceSets {
     main {
+        proto {
+            srcDir("src/main/resources/proto")
+        }
         kotlin {
+            srcDir("${layout.buildDirectory.get()}/generated/source/proto/main/kotlin")
             srcDir("${layout.buildDirectory.get()}/generated/openapi/src/main/kotlin")
-            srcDir("${layout.buildDirectory.get()}/generated/websocket/src/main/kotlin")
         }
     }
 }
 
-// Ensure all generation happens before compilation
+// Ensure generation happens before compilation
 tasks.compileKotlin {
-    dependsOn("openApiGenerate", "generateWebSocketModels")
+    dependsOn("generateProto", "openApiGenerate")
 }
 
-// Clean task to remove generated files
+// Clean generated files
 tasks.clean {
     delete("${layout.buildDirectory.get()}/generated")
 }

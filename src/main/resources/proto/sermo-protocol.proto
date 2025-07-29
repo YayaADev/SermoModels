@@ -1,0 +1,154 @@
+syntax = "proto3";
+
+package sermo.protocol;
+
+// Wrapper for all WebSocket messages
+message WebSocketMessage {
+  oneof message {
+    // Client -> Server
+    StartConversation start_conversation = 1;
+    AudioChunk audio_chunk = 2;
+    EndConversation end_conversation = 3;
+    
+    // Server -> Client
+    TranscriptPartial transcript_partial = 10;
+    TranscriptFinal transcript_final = 11;
+    AIResponseStart ai_response_start = 12;
+    TTSAudioChunk tts_audio_chunk = 13;
+    AIResponseEnd ai_response_end = 14;
+    ErrorMessage error = 20;
+    ConversationReset conversation_reset = 21;
+  }
+}
+
+// ============================================================================
+// Client -> Server Messages
+// ============================================================================
+
+message StartConversation {
+  string language_code = 1;  // e.g., "es-ES", "fr-FR"
+  optional string topic = 2; // optional conversation topic
+}
+
+message AudioChunk {
+  bytes pcm_data = 1;        // Raw PCM audio data
+  int64 timestamp = 2;       // Client timestamp (milliseconds since epoch)
+  int32 sample_rate = 3;     // Audio sample rate (e.g., 16000)
+  int32 channels = 4;        // Number of audio channels (typically 1 for mono)
+}
+
+message EndConversation {
+  string reason = 1;         // e.g., "user_ended", "app_backgrounded"
+}
+
+// ============================================================================
+// Server -> Client Messages  
+// ============================================================================
+
+message TranscriptPartial {
+  string text = 1;           // Partial transcription text
+  double confidence = 2;     // Confidence score (0.0 to 1.0)
+  int64 timestamp = 3;       // Server timestamp
+}
+
+message TranscriptFinal {
+  string text = 1;           // Final transcription text
+  double confidence = 2;     // Confidence score (0.0 to 1.0)
+  int64 timestamp = 3;       // Server timestamp
+}
+
+message AIResponseStart {
+  string text = 1;           // Full AI response text (for display while TTS plays)
+  int64 timestamp = 2;       // Server timestamp
+  string language_code = 3;  // Language of the response
+}
+
+message TTSAudioChunk {
+  bytes audio_data = 1;      // TTS audio chunk (encoded format from Google TTS)
+  int32 sequence_number = 2; // Sequence number for ordering
+  bool is_final_chunk = 3;   // True if this is the last chunk of the response
+  int64 timestamp = 4;       // Server timestamp
+}
+
+message AIResponseEnd {
+  int64 timestamp = 1;       // Server timestamp
+  int32 total_chunks = 2;    // Total number of TTS chunks sent
+}
+
+message ErrorMessage {
+  ErrorCode code = 1;
+  string message = 2;        // Human-readable error description
+  bool restart_required = 3; // Whether client should restart conversation
+  int64 timestamp = 4;
+}
+
+message ConversationReset {
+  ResetReason reason = 1;
+  int64 timestamp = 2;
+}
+
+// ============================================================================
+// Enums
+// ============================================================================
+
+enum ErrorCode {
+  UNKNOWN_ERROR = 0;
+  STT_CONNECTION_FAILED = 1;
+  STT_TIMEOUT = 2;
+  GPT_API_ERROR = 3;
+  TTS_GENERATION_FAILED = 4;
+  INVALID_AUDIO_FORMAT = 5;
+  UNSUPPORTED_LANGUAGE = 6;
+  RATE_LIMIT_EXCEEDED = 7;
+  INTERNAL_SERVER_ERROR = 8;
+}
+
+enum ResetReason {
+  UNKNOWN_RESET = 0;
+  ERROR_RECOVERY = 1;
+  CONNECTION_LOST = 2;
+  CLIENT_REQUESTED = 3;
+  TIMEOUT = 4;
+}
+
+// ============================================================================
+// Internal Data Structures (for service interfaces)
+// ============================================================================
+
+message ConversationTurn {
+  Speaker speaker = 1;
+  string text = 2;
+  int64 timestamp = 3;
+}
+
+message ConversationHistory {
+  repeated ConversationTurn turns = 1;
+  string language_code = 2;
+  int64 conversation_started = 3;
+}
+
+message AudioAnalysis {
+  double amplitude = 1;      // Audio amplitude level
+  bool is_silent = 2;        // Whether this chunk is considered silent
+  int64 timestamp = 3;
+  double noise_floor = 4;    // Background noise level
+}
+
+message SilenceEvent {
+  SilenceEventType type = 1;
+  int64 silence_duration_ms = 2; // How long silence has been detected
+  int64 timestamp = 3;
+}
+
+enum Speaker {
+  UNKNOWN_SPEAKER = 0;
+  USER = 1;
+  AI = 2;
+}
+
+enum SilenceEventType {
+  UNKNOWN_SILENCE = 0;
+  SILENCE_STARTED = 1;
+  SILENCE_DETECTED = 2;      // Triggered after 1.5s threshold
+  SPEECH_RESUMED = 3;
+}

@@ -1,17 +1,19 @@
 {
   "name": "@yayaadev/sermo-models",
   "version": "1.0.1",
-  "description": "TypeScript models for Sermo API (HTTP and WebSocket) generated from OpenAPI specifications",
+  "description": "TypeScript models for Sermo - HTTP models (OpenAPI) and real-time streaming models (Protocol Buffers)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist/**/*"
   ],
   "scripts": {
-    "build": "gradle generateTypeScript generateWebSocketTypeScript createCombinedIndexFile && npm run compile",
+    "build": "gradle generateTypeScript generateProtobufTypeScript createCombinedIndexFile && npm run compile",
     "compile": "tsc",
     "prepublishOnly": "npm run build",
-    "clean": "rm -rf dist/ build/generated/typescript/ build/generated/typescript-websocket/"
+    "clean": "rm -rf dist/ build/generated/",
+    "build-http": "gradle generateTypeScript && npm run compile",
+    "build-protobuf": "gradle generateProtobufTypeScript && npm run compile"
   },
   "keywords": [
     "sermo",
@@ -19,17 +21,19 @@
     "models",
     "typescript",
     "openapi",
-    "speech",
-    "language-learning",
-    "websocket",
-    "real-time"
+    "protobuf",
+    "real-time",
+    "streaming"
   ],
   "author": "Sermo Team",
   "license": "MIT",
   "devDependencies": {
+    "@types/google-protobuf": "^3.15.12",
     "typescript": "^5.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "google-protobuf": "^3.21.4"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/yourusername/sermo-models.git"
